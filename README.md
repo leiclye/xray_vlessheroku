@@ -4,11 +4,10 @@
 
 用于在 Heroku 上部署 vless+websocket+tls，每次部署自动选择最新的 alpine linux 和 xray core。  
 vless 相比 vmess 性能更加优秀，占用资源更少，运行更加稳定。
-
 以及xray支持UDP协议的FullCone，个人使用更推荐使用xray-core以便获取更好的体验。
 
 ## 感谢
-感谢大佬GeekNAUer/vlessheroku做的项目
+感谢大佬GeekNAUer/vlessheroku做的项目，应为fork了很多其他的项目，太多重名的，所以我只是改个名字，方便自己使用。
 https://github.com/GeekNAUer/vlessheroku
 
 ## 镜像
@@ -29,7 +28,7 @@ https://github.com/GeekNAUer/vlessheroku
 
 ### alterId
 
-`alterId` 为 `0` 。
+`alterId` 为 `0` 。 // xray，vless协议不需要使用此参数了。
 
 ### UUID
 
@@ -37,15 +36,25 @@ https://github.com/GeekNAUer/vlessheroku
 
 ## 流量中转
 
-可以使用cloudflare的workers来`中转流量`，配置为：  
+可以使用cloudflare的workers来`中转流量`，注册两个账号就可以避免流量用太高的问题，配置为：  
 
-addEventListener(  
-&emsp;&emsp;"fetch",event => {  
-&emsp;&emsp;&emsp;&emsp;let url=new URL(event.request.url);  
-&emsp;&emsp;&emsp;&emsp;url.hostname="xx.herokuapp.com";//你的heroku域名    
-&emsp;&emsp;&emsp;&emsp;let request=new Request(url,event.request);  
-&emsp;&emsp;&emsp;&emsp;event. respondWith(  
-&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;fetch(request)  
-&emsp;&emsp;&emsp;&emsp;)  
-&emsp;&emsp;}  
-)  
+const SingleDay = 'app1.herokuapp.com'
+const DoubleDay = 'app2.herokuapp.com'
+addEventListener(
+    "fetch",event => {
+    
+        let nd = new Date();
+        if (nd.getDate()%2) {
+            host = SingleDay
+        } else {
+            host = DoubleDay
+        }
+        
+        let url=new URL(event.request.url);
+        url.hostname=host;
+        let request=new Request(url,event.request);
+        event. respondWith(
+            fetch(request)
+        )
+    }
+)
